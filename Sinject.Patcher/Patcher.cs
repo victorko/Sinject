@@ -23,47 +23,29 @@ namespace Sinject.Patcher
             var type = this.assembly.GetType(typeName);
             var method = type.GetMethod(methodName);
 
-            var callStubMethodRef = this.assembly.MethodRef(typeof(Stubs), "CallStub");
-            var isPatched = method.Body.Instructions.Any(
-                instr => instr.OpCode == OpCodes.Call && instr.Operand.ToString() == callStubMethodRef.ToString());
-            if (isPatched) return;
+            // If already patched return
+            if (IsPatched(method)) return;
 
-            var argsCount = method.Parameters.Count + (method.IsStatic ? 0 : 1);
-
+            // Create array with arguments
             var argsVar = method.AddVariable(this.assembly.TypeRef(typeof(object[])));
-            var index = method.InsertIL(0,
-                Instruction.Create(OpCodes.Ldc_I4, argsCount),
-                Instruction.Create(OpCodes.Newarr, this.assembly.TypeRef(typeof(object))),
-                Instruction.Create(OpCodes.Stloc, argsVar));
+            var index = CreateArgsArray(method, argsVar, 0);
 
-            if (!method.IsStatic)
-            {
-                index = method.InsertIL(index,
-                    Instruction.Create(OpCodes.Ldloc, argsVar),
-                    Instruction.Create(OpCodes.Ldc_I4, 0),
-                    Instruction.Create(OpCodes.Ldarg_0),
-                    Instruction.Create(OpCodes.Stelem_Ref));
-            }
-            for (var i = 0; i < method.Parameters.Count; i++)
-            {
-                index = method.InsertIL(index,
-                    Instruction.Create(OpCodes.Ldloc, argsVar),
-                    Instruction.Create(OpCodes.Ldc_I4, i + (method.IsStatic ? 0 : 1)),
-                    Instruction.Create(OpCodes.Ldarg, method.Parameters[i]),
-                    Instruction.Create(OpCodes.Stelem_Ref));
-            }
-
+            // Call method Stubs.CallStub
             var resultVar = method.AddVariable(this.assembly.TypeRef(typeof(object)));
-            index = method.InsertIL(index,
-                Instruction.Create(OpCodes.Ldstr, type.FullName),
-                Instruction.Create(OpCodes.Ldstr, method.Name),
-                Instruction.Create(OpCodes.Ldloc, argsVar),
-                Instruction.Create(OpCodes.Ldloca_S, resultVar),
-                Instruction.Create(OpCodes.Call, callStubMethodRef));
+            index = CallCallStub(type, method, argsVar, index, resultVar);
 
-            index = method.InsertIL(index,
-                Instruction.Create(OpCodes.Brfalse, method.Body.Instructions[index]));
+            // Branch to original method code if Stubs.CallStub returns false
+            index = method.InsertIL(index, Instruction.Create(OpCodes.Brfalse, method.Body.Instructions[index]));
 
+            // Push return value
+            index = PushReturnValue(method, index, resultVar);
+
+            // Return
+            method.InsertIL(index, Instruction.Create(OpCodes.Ret));
+        }
+
+        private static int PushReturnValue(MethodDefinition method, int index, VariableDefinition resultVar)
+        {
             if (method.ReturnType.FullName != "System.Void")
             {
                 index = method.InsertIL(index,
@@ -75,10 +57,59 @@ namespace Sinject.Patcher
                         Instruction.Create(OpCodes.Unbox_Any, method.ReturnType));
                 }
             }
+            return index;
+        }
 
+        private int CallCallStub(TypeDefinition type, MethodDefinition method, VariableDefinition argsVar, int index, VariableDefinition resultVar)
+        {
+            var callStubMethodRef = this.assembly.MethodRef(typeof(Stubs), "CallStub");
+            return method.InsertIL(index,
+                Instruction.Create(OpCodes.Ldstr, type.FullName),
+                Instruction.Create(OpCodes.Ldstr, method.Name),
+                Instruction.Create(OpCodes.Ldloc, argsVar),
+                Instruction.Create(OpCodes.Ldloca_S, resultVar),
+                Instruction.Create(OpCodes.Call, callStubMethodRef));
+        }
+
+        private int CreateArgsArray(MethodDefinition method, VariableDefinition argsVar, int index)
+        {
+            // Create array
+            var argsCount = method.Parameters.Count + (method.IsStatic ? 0 : 1);
+            
             index = method.InsertIL(index,
-                Instruction.Create(OpCodes.Ret));
+                Instruction.Create(OpCodes.Ldc_I4, argsCount),
+                Instruction.Create(OpCodes.Newarr, this.assembly.TypeRef(typeof(object))),
+                Instruction.Create(OpCodes.Stloc, argsVar));
 
+            // Fill array:
+            if (!method.IsStatic)
+            {
+                // add this
+                index = method.InsertIL(index,
+                    Instruction.Create(OpCodes.Ldloc, argsVar),
+                    Instruction.Create(OpCodes.Ldc_I4, 0),
+                    Instruction.Create(OpCodes.Ldarg_0),
+                    Instruction.Create(OpCodes.Stelem_Ref));
+            }
+            // add parameters
+            for (var i = 0; i < method.Parameters.Count; i++)
+            {
+                index = method.InsertIL(index,
+                    Instruction.Create(OpCodes.Ldloc, argsVar),
+                    Instruction.Create(OpCodes.Ldc_I4, i + (method.IsStatic ? 0 : 1)),
+                    Instruction.Create(OpCodes.Ldarg, method.Parameters[i]),
+                    Instruction.Create(OpCodes.Stelem_Ref));
+            }
+
+            return index;
+        }
+
+        private bool  IsPatched(MethodDefinition method)
+        {
+            var callStubMethodRef = this.assembly.MethodRef(typeof(Stubs), "CallStub");
+            return method.Body.Instructions.Any(
+                instr => instr.OpCode == OpCodes.Call && 
+                         instr.Operand.ToString() == callStubMethodRef.ToString());
         }
 
 
