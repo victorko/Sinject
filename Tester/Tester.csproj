@@ -62,9 +62,14 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>cd $(ProjectDir)
-"..\Sinject.Patcher\bin\Debug\Sinject.Patcher.exe" patch.xml</PreBuildEvent>
+    <PreBuildEvent>
+    </PreBuildEvent>
   </PropertyGroup>
+
+  <UsingTask TaskName="Sinject.Patcher.PatchAssembliesTask" AssemblyFile="..\Sinject.Patcher\bin\Debug\Sinject.Patcher.exe"/>
+  <Target Name="BeforeBuild">
+    <PatchAssembliesTask PatchFilePath="patch.xml"/>
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

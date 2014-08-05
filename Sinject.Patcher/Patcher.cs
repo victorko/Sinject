@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Sinject.Runtime;
+using System.Xml.Linq;
 
 namespace Sinject.Patcher
 {
@@ -54,7 +55,7 @@ namespace Sinject.Patcher
                 if (method.ReturnType.IsValueType)
                 {
                     index = method.InsertIL(index,
-                        Instruction.Create(OpCodes.Unbox_Any, method.ReturnType));
+                        Instruction.Create(OpCodes.Unbox_Any, method.ReturnType)); //TODO: process outs and refs
                 }
             }
             return index;
@@ -97,8 +98,8 @@ namespace Sinject.Patcher
                 index = method.InsertIL(index,
                     Instruction.Create(OpCodes.Ldloc, argsVar),
                     Instruction.Create(OpCodes.Ldc_I4, i + (method.IsStatic ? 0 : 1)),
-                    Instruction.Create(OpCodes.Ldarg, method.Parameters[i]),
-                    Instruction.Create(OpCodes.Stelem_Ref));
+                    Instruction.Create(OpCodes.Ldarg, method.Parameters[i]), //TODO: process refs
+                    Instruction.Create(OpCodes.Stelem_Ref)); //TODO: boxing before add to array???
             }
 
             return index;
@@ -106,6 +107,7 @@ namespace Sinject.Patcher
 
         private bool  IsPatched(MethodDefinition method)
         {
+            //TODO: Redo with attribute marking
             var callStubMethodRef = this.assembly.MethodRef(typeof(Stubs), "CallStub");
             return method.Body.Instructions.Any(
                 instr => instr.OpCode == OpCodes.Call && 
@@ -116,6 +118,26 @@ namespace Sinject.Patcher
         public void Save(string assemblyPath)
         {
             this.assembly.Write(assemblyPath);
+        }
+        
+        public static void ProcessPatchesFile(string filePath)
+        {
+            var root = XElement.Load(filePath);
+            foreach (var assembly in root.Elements("assembly"))
+            {
+                var assemblyPath = assembly.Attribute("path").Value;
+                var patcher = new Patcher(assemblyPath);
+                foreach (var type in assembly.Elements("type"))
+                {
+                    var typeName = type.Attribute("name").Value;
+                    var methods = type.Value.Split(',').Select(token => token.Trim());
+                    foreach (var methodName in methods)
+                    {
+                        patcher.Patch(typeName, methodName);
+                    }
+                }
+                patcher.Save(assemblyPath);
+            }
         }
     }
 }

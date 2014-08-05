@@ -17,22 +17,7 @@ namespace Sinject.Patcher
 
             try
             {
-                var root = XElement.Load(args[0]);
-                foreach (var assembly in root.Elements("assembly"))
-                {
-                    var assemblyPath = assembly.Attribute("path").Value;
-                    var patcher = new Patcher(assemblyPath);
-                    foreach (var type in assembly.Elements("type"))
-                    {
-                        var typeName = type.Attribute("name").Value;
-                        var methods = type.Value.Split(',').Select(token => token.Trim());
-                        foreach (var methodName in methods)
-                        {
-                            patcher.Patch(typeName, methodName);
-                        }
-                    }
-                    patcher.Save(assemblyPath);
-                }
+                Patcher.ProcessPatchesFile(args[0]);
             }
             catch (Exception ex)
             {

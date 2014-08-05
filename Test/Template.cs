@@ -44,5 +44,23 @@ namespace Test
                 }
             }
         }
+
+        public bool Yey(int i, ref object o, out string s, out int j)
+        {
+            var args = new object[] { this, i, o, null, null };
+            object result;
+            if (Stubs.CallStub("Test.Template", "Yey", args, out result))
+            {
+                o = args[2];
+                s = (string)args[3];
+                j = (int)args[4];
+                return (bool)result;
+            }
+
+            o = new object();
+            s = "asddf";
+            j = 15;
+            return false;
+        }
     }
 }
