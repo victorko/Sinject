@@ -32,6 +32,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Build" />
     <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="Microsoft.Build.Utilities.v4.0" />
     <Reference Include="Mono.Cecil">
@@ -58,6 +59,7 @@
     <Compile Include="HelperExtensions.cs" />
     <Compile Include="PatchAssembliesTask.cs" />
     <Compile Include="Patcher.cs" />
+    <Compile Include="PatchesFile.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

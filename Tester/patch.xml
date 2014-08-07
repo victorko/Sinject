@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <patch>
-  <assembly path="C:\Users\victorko\Documents\GitHub\Sinject\Test\bin\Release\Test.dll">
+  <assembly name="Test">
     <type name="Test.Victim">Foo, get_Bar, set_Bar, Baz</type>
   </assembly>
 </patch>
