@@ -9,6 +9,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sinject.Runtime", "Sinject.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tester", "Tester\Tester.csproj", "{14E598DF-FE04-472D-8D6D-7A6E8EA7573A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BF9E7DC0-0099-4D83-BAA7-55D51B46CFBA}"
+	ProjectSection(SolutionItems) = preProject
+		Sinject.1.0.0.nupkg = Sinject.1.0.0.nupkg
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tester2", "Tester2\Tester2.csproj", "{D72A5E69-1203-486A-8879-195D5D679815}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sinject.NuGetPackage", "Sinject.NuGetPackage\Sinject.NuGetPackage.csproj", "{0451BAEF-DF2E-4B98-8644-94EE9415E389}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +40,14 @@ Global
 		{14E598DF-FE04-472D-8D6D-7A6E8EA7573A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{14E598DF-FE04-472D-8D6D-7A6E8EA7573A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{14E598DF-FE04-472D-8D6D-7A6E8EA7573A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D72A5E69-1203-486A-8879-195D5D679815}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D72A5E69-1203-486A-8879-195D5D679815}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D72A5E69-1203-486A-8879-195D5D679815}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D72A5E69-1203-486A-8879-195D5D679815}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0451BAEF-DF2E-4B98-8644-94EE9415E389}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0451BAEF-DF2E-4B98-8644-94EE9415E389}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0451BAEF-DF2E-4B98-8644-94EE9415E389}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0451BAEF-DF2E-4B98-8644-94EE9415E389}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
